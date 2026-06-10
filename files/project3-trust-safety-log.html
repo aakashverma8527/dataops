@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trust & Safety Moderation Log | Aakash Verma</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8;color:#1a202c;font-size:13px}
+.topbar{background:#0D2B5E;color:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.topbar h1{font-size:15px;font-weight:600}
+.topbar-meta{font-size:11px;opacity:0.65;margin-top:2px}
+.btn{padding:6px 14px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:opacity 0.15s}
+.btn-ghost{background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.25)}.btn-ghost:hover{background:rgba(255,255,255,0.2)}
+.btn-navy{background:#0D2B5E;color:#fff}.btn-navy:hover{opacity:0.88}
+.stats-bar{display:flex;gap:12px;padding:16px 24px;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid #E2E8F0;border-radius:6px;padding:14px 18px;flex:1;min-width:120px;border-top:3px solid #0D2B5E}
+.stat.green{border-top-color:#22C55E}
+.stat.red{border-top-color:#EF4444}
+.stat.amber{border-top-color:#F59E0B}
+.stat.purple{border-top-color:#8B5CF6}
+.stat-num{font-size:22px;font-weight:700;color:#0D2B5E;line-height:1}
+.stat.green .stat-num{color:#15803D}
+.stat.red .stat-num{color:#B91C1C}
+.stat.amber .stat-num{color:#B45309}
+.stat.purple .stat-num{color:#6D28D9}
+.stat-lbl{font-size:11px;color:#718096;margin-top:3px;text-transform:uppercase;letter-spacing:0.8px}
+.accuracy-bar-wrap{background:#fff;border:1px solid #E2E8F0;border-radius:6px;padding:12px 18px;flex:1;min-width:180px}
+.accuracy-label{font-size:11px;color:#718096;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px}
+.accuracy-track{height:8px;background:#E2E8F0;border-radius:4px;overflow:hidden}
+.accuracy-fill{height:100%;background:linear-gradient(90deg,#22C55E,#16A34A);border-radius:4px;width:96.4%}
+.accuracy-val{font-size:20px;font-weight:700;color:#15803D;margin-top:4px}
+.toolbar{background:#fff;border-bottom:1px solid #E2E8F0;padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar label{font-size:12px;color:#4A5568;font-weight:500}
+.toolbar select,.toolbar input{border:1px solid #CBD5E0;border-radius:4px;padding:5px 10px;font-size:12px;color:#2D3748;font-family:inherit}
+.count-info{font-size:12px;color:#718096;margin-left:auto}
+.table-wrap{padding:0 24px 8px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E2E8F0;border-radius:6px;overflow:hidden;min-width:1000px}
+thead tr{background:#1E3A5F;color:#fff}
+th{padding:9px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap}
+tbody tr{border-bottom:1px solid #F0F4F8;transition:background 0.1s}
+tbody tr:hover{background:#F7FAFC}
+td{padding:8px 12px;font-size:12px;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-approved{background:#DCFCE7;color:#15803D}
+.b-rejected{background:#FEE2E2;color:#B91C1C}
+.b-escalated{background:#EDE9FE;color:#6D28D9}
+.b-review{background:#FEF9C3;color:#A16207}
+.conf-bar{height:6px;border-radius:3px;background:#E2E8F0;overflow:hidden;margin-top:3px;width:60px}
+.conf-fill{height:100%;border-radius:3px}
+.conf-high{background:#22C55E}
+.conf-mid{background:#F59E0B}
+.conf-low{background:#EF4444}
+.cat-pill{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.cat-nudity{background:#FEE2E2;color:#991B1B}
+.cat-violence{background:#FEF3C7;color:#92400E}
+.cat-spam{background:#E0E7FF;color:#3730A3}
+.cat-hate{background:#FCE7F3;color:#9D174D}
+.cat-graphic{background:#FFF7ED;color:#C2410C}
+.cat-misinformation{background:#F0FDF4;color:#166534}
+.cat-selfharm{background:#F5F3FF;color:#5B21B6}
+footer{text-align:center;padding:14px;font-size:11px;color:#A0AEC0;border-top:1px solid #E2E8F0;background:#fff;margin:8px 24px 24px;border-radius:0 0 6px 6px}
+@media print{.toolbar,.topbar .btn-ghost{display:none}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Trust & Safety — Content Moderation Operations Log</h1>
+    <div class="topbar-meta">Platform: Global Content Platform (Confidential) &nbsp;·&nbsp; Reviewer: Aakash Verma &nbsp;·&nbsp; Session: 10 Jun 2025, 09:00–18:00 IST</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-ghost" onclick="window.print()">🖨 Print</button>
+    <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num" id="s-total">0</div><div class="stat-lbl">Total Reviewed</div></div>
+  <div class="stat green"><div class="stat-num" id="s-approved">0</div><div class="stat-lbl">Approved</div></div>
+  <div class="stat red"><div class="stat-num" id="s-rejected">0</div><div class="stat-lbl">Rejected</div></div>
+  <div class="stat amber"><div class="stat-num" id="s-review">0</div><div class="stat-lbl">Needs Review</div></div>
+  <div class="stat purple"><div class="stat-num" id="s-escalated">0</div><div class="stat-lbl">Escalated</div></div>
+  <div class="accuracy-bar-wrap">
+    <div class="accuracy-label">Session Accuracy Rate</div>
+    <div class="accuracy-val">96.4%</div>
+    <div class="accuracy-track"><div class="accuracy-fill"></div></div>
+    <div style="font-size:10px;color:#718096;margin-top:4px">Target: ≥95.0% &nbsp;·&nbsp; <span style="color:#15803D;font-weight:600">✓ On Target</span></div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <label>Category:</label>
+  <select id="catF" onchange="applyFilter()">
+    <option value="">All Categories</option>
+    <option>Nudity/Sexual</option><option>Violence</option><option>Spam/Scam</option>
+    <option>Hate Speech</option><option>Graphic Content</option>
+    <option>Misinformation</option><option>Self-Harm</option>
+  </select>
+  <label>Status:</label>
+  <select id="statF" onchange="applyFilter()">
+    <option value="">All Statuses</option>
+    <option>Approved</option><option>Rejected</option>
+    <option>Escalated</option><option>Needs Review</option>
+  </select>
+  <label>Min Confidence:</label>
+  <select id="confF" onchange="applyFilter()">
+    <option value="0">Any</option>
+    <option value="90">≥90%</option>
+    <option value="80">≥80%</option>
+    <option value="70">≥70%</option>
+  </select>
+  <input type="text" id="searchF" placeholder="Search Content ID..." oninput="applyFilter()" style="width:160px">
+  <span class="count-info" id="countInfo"></span>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+  <th>#</th><th>Content ID</th><th>Category</th><th>Policy Violated</th>
+  <th>Action Taken</th><th>Confidence</th><th>Review Time</th><th>Status</th><th>Reviewed At</th><th>Notes</th>
+</tr></thead>
+<tbody id="tableBody"></tbody>
+</table>
+<footer>Prepared by <strong>Aakash Verma</strong> &nbsp;|&nbsp; aakashverma852787@gmail.com &nbsp;|&nbsp; linkedin.com/in/aakashverma-dataops &nbsp;|&nbsp; Confidential — Internal Operations Document</footer>
+</div>
+
+<script>
+const DATA = [
+  ["IMG-20250610-4821","Nudity/Sexual","§3.1 Adult Content","Content Removed","97%",28,"Approved","09:04","Clear policy violation; partial nudity confirmed"],
+  ["IMG-20250610-4822","Violence","§5.2 Graphic Violence","Content Removed","94%",31,"Approved","09:07","Depicts physical assault; flagged for law enforcement referral"],
+  ["IMG-20250610-4823","Spam/Scam","§8.1 Commercial Spam","Post Hidden","91%",19,"Approved","09:10","Repeated promotional text; third offense account"],
+  ["IMG-20250610-4824","Hate Speech","§4.3 Racial Slurs","Warning Issued","88%",42,"Approved","09:14","First offense; slur in caption; account warned"],
+  ["IMG-20250610-4825","Graphic Content","§5.4 Self-Harm Depiction","Content Removed","96%",24,"Approved","09:17","Visible self-harm imagery; crisis resource added to account"],
+  ["IMG-20250610-4826","Nudity/Sexual","§3.2 CSAM Adjacent","Escalated to L2","99%",15,"Escalated","09:20","Potential CSAM flag; immediately escalated per protocol §1.0"],
+  ["IMG-20250610-4827","Misinformation","§9.1 Health Misinfo","Label Added","82%",38,"Approved","09:25","False vaccine claim; misinformation label applied"],
+  ["IMG-20250610-4828","Violence","§5.1 Animal Cruelty","Content Removed","93%",27,"Approved","09:29","Clear animal cruelty; reported to ASPCA partner org"],
+  ["IMG-20250610-4829","Spam/Scam","§8.3 Phishing Link","Account Suspended","98%",22,"Approved","09:32","Confirmed phishing URL in bio; third-party verified"],
+  ["IMG-20250610-4830","Hate Speech","§4.1 Religious Hate","Content Removed","89%",35,"Approved","09:37","Targeted religious community; coordinated hate pattern"],
+  ["IMG-20250610-4831","Graphic Content","§5.3 Accident Imagery","No Action","76%",44,"Needs Review","09:42","Newsworthy context possible; referred to policy team"],
+  ["IMG-20250610-4832","Nudity/Sexual","§3.3 Non-Consensual","Content Removed","95%",29,"Approved","09:45","Revenge porn indicators; priority removal per §3.3"],
+  ["IMG-20250610-4833","Spam/Scam","§8.2 Fake Giveaway","Post Hidden","90%",21,"Approved","09:48","Impersonating verified brand; fake prize scam"],
+  ["IMG-20250610-4834","Violence","§5.5 War Content","Label Added","84%",41,"Approved","09:53","Conflict zone imagery; context label applied"],
+  ["IMG-20250610-4835","Misinformation","§9.3 Election Misinfo","Escalated to L2","87%",33,"Escalated","09:57","Election interference content; legal team notification triggered"],
+  ["IMG-20250610-4836","Hate Speech","§4.2 Gender-Based Hate","Warning Issued","83%",39,"Approved","10:02","Borderline content; first offense; educational warning"],
+  ["IMG-20250610-4837","Nudity/Sexual","§3.1 Adult Content","No Action","71%",47,"Needs Review","10:07","Artistic nudity claim; referred to senior reviewer"],
+  ["IMG-20250610-4838","Graphic Content","§5.2 Medical Imagery","No Action","78%",43,"Approved","10:11","Medical/educational context verified; no action required"],
+  ["IMG-20250610-4839","Spam/Scam","§8.4 Cryptocurrency Scam","Account Suspended","97%",18,"Approved","10:14","Crypto rug-pull promotion; coordinated network detected"],
+  ["IMG-20250610-4840","Self-Harm","§6.1 Suicide Promotion","Content Removed","96%",26,"Approved","10:18","Explicit suicide method; crisis resources sent; account flagged"],
+  ["IMG-20250610-4841","Violence","§5.1 Weapons Display","No Action","74%",45,"Needs Review","10:23","Hunting context; legality unclear; referred to regional policy"],
+  ["IMG-20250610-4842","Nudity/Sexual","§3.4 Minor Safety","Escalated to L2","99%",12,"Escalated","10:25","Potential minor in content; zero-tolerance escalation §1.0"],
+  ["IMG-20250610-4843","Hate Speech","§4.4 Disability Hate","Content Removed","91%",34,"Approved","10:30","Mocking disability; clear §4.4 violation"],
+  ["IMG-20250610-4844","Misinformation","§9.2 COVID Misinfo","Label Added","85%",37,"Approved","10:34","Outdated COVID claim being reshared; fact-check label"],
+  ["IMG-20250610-4845","Spam/Scam","§8.1 Commercial Spam","Post Hidden","92%",20,"Approved","10:37","Mass-tagged spam post; automated pattern match confirmed"],
+  ["IMG-20250610-4846","Graphic Content","§5.6 Drug Use","Warning Issued","86%",36,"Approved","10:41","Recreational drug display; first offense warning issued"],
+  ["IMG-20250610-4847","Violence","§5.3 Domestic Violence","Content Removed","94%",30,"Approved","10:45","Domestic abuse documentation; removed + support resources sent"],
+  ["IMG-20250610-4848","Nudity/Sexual","§3.1 Adult Content","No Action","68%",50,"Needs Review","10:50","Swimwear/underwear ad; borderline; passed to policy team"],
+];
+
+const CAT_CLASS = {
+  "Nudity/Sexual":"cat-nudity","Violence":"cat-violence","Spam/Scam":"cat-spam",
+  "Hate Speech":"cat-hate","Graphic Content":"cat-graphic","Misinformation":"cat-misinformation",
+  "Self-Harm":"cat-selfharm"
+};
+const STATUS_CLASS = {
+  "Approved":"b-approved","Rejected":"b-rejected","Escalated":"b-escalated","Needs Review":"b-review"
+};
+
+function confClass(c){const v=parseInt(c);return v>=90?'conf-high':v>=80?'conf-mid':'conf-low';}
+
+let filtered = [...DATA];
+
+function renderTable(rows){
+  const tb = document.getElementById('tableBody');
+  tb.innerHTML = rows.map((r,i)=>`
+    <tr>
+      <td style="color:#A0AEC0;font-size:11px">${String(i+1).padStart(2,'0')}</td>
+      <td><code style="font-size:11px;color:#1A56A0;background:#EBF1FB;padding:2px 5px;border-radius:3px">${r[0]}</code></td>
+      <td><span class="cat-pill ${CAT_CLASS[r[1]]||''}">${r[1]}</span></td>
+      <td style="color:#4A5568;font-size:11px">${r[2]}</td>
+      <td style="font-weight:500">${r[3]}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;font-weight:600;color:#2D3748">${r[4]}</span>
+        </div>
+        <div class="conf-bar"><div class="conf-fill ${confClass(r[4])}" style="width:${r[4]}"></div></div>
+      </td>
+      <td style="color:#718096">${r[5]}s</td>
+      <td><span class="badge ${STATUS_CLASS[r[7]]||''}">${r[7]}</span></td>
+      <td style="color:#718096;font-size:11px">${r[8]}</td>
+      <td style="color:#4A5568;font-size:11px;max-width:200px;white-space:normal">${r[9]}</td>
+    </tr>
+  `).join('');
+  document.getElementById('countInfo').textContent = `Showing ${rows.length} of ${DATA.length} records`;
+  updateStats(rows);
+}
+
+function updateStats(rows){
+  document.getElementById('s-total').textContent = rows.length;
+  document.getElementById('s-approved').textContent = rows.filter(r=>r[7]==='Approved').length;
+  document.getElementById('s-rejected').textContent = rows.filter(r=>r[7]==='Rejected').length;
+  document.getElementById('s-review').textContent = rows.filter(r=>r[7]==='Needs Review').length;
+  document.getElementById('s-escalated').textContent = rows.filter(r=>r[7]==='Escalated').length;
+}
+
+function applyFilter(){
+  const cat = document.getElementById('catF').value;
+  const stat = document.getElementById('statF').value;
+  const conf = parseInt(document.getElementById('confF').value)||0;
+  const q = document.getElementById('searchF').value.toLowerCase();
+  filtered = DATA.filter(r=>{
+    if(cat && r[1]!==cat) return false;
+    if(stat && r[7]!==stat) return false;
+    if(conf && parseInt(r[4])<conf) return false;
+    if(q && !r[0].toLowerCase().includes(q)) return false;
+    return true;
+  });
+  renderTable(filtered);
+}
+
+function exportCSV(){
+  const h = ['#','Content ID','Category','Policy','Action','Confidence','Time(s)','Status','Reviewed At','Notes'];
+  const rows = filtered.map((r,i)=>[i+1,...r].map(v=>`"${v}"`).join(','));
+  const csv = [h.join(','),...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'TrustSafety_ModerationLog_AakashVerma.csv';
+  a.click();
+}
+
+renderTable(DATA);
+</script>
+</body>
+</html>

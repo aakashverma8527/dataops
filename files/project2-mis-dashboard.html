@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIS Dashboard — eCommerce Performance | Aakash Verma</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8;color:#1a202c;font-size:13px}
+.topbar{background:#0D2B5E;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.topbar h1{font-size:16px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.topbar-meta{font-size:11px;opacity:0.65}
+select,button{font-family:inherit;font-size:12px}
+.filter-bar{background:#fff;border-bottom:1px solid #E2E8F0;padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.filter-bar label{font-size:12px;color:#4A5568;font-weight:500}
+.filter-bar select{border:1px solid #CBD5E0;border-radius:4px;padding:5px 10px;color:#2D3748}
+.btn{padding:7px 16px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:opacity 0.15s}
+.btn-navy{background:#0D2B5E;color:#fff}.btn-navy:hover{opacity:0.88}
+.updated{font-size:11px;color:#718096;margin-left:auto}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 24px}
+.kpi{background:#fff;border:1px solid #E2E8F0;border-radius:6px;padding:16px 20px;border-left:4px solid #0D2B5E}
+.kpi.green{border-left-color:#22C55E}
+.kpi.amber{border-left-color:#F59E0B}
+.kpi.red{border-left-color:#EF4444}
+.kpi-label{font-size:11px;color:#718096;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.kpi-val{font-size:26px;font-weight:700;color:#0D2B5E;line-height:1}
+.kpi-change{font-size:11px;margin-top:4px}
+.kpi-change.up{color:#22C55E}.kpi-change.down{color:#EF4444}
+.charts-row{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;padding:0 24px 16px}
+.chart-card{background:#fff;border:1px solid #E2E8F0;border-radius:6px;padding:18px}
+.chart-title{font-size:13px;font-weight:600;color:#0D2B5E;margin-bottom:14px}
+.chart-subtitle{font-size:11px;color:#718096;margin-top:-10px;margin-bottom:12px}
+.table-card{background:#fff;border:1px solid #E2E8F0;border-radius:6px;margin:0 24px 24px;overflow:hidden}
+.table-header{padding:14px 18px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between}
+.table-header span{font-size:13px;font-weight:600;color:#0D2B5E}
+table{width:100%;border-collapse:collapse}
+thead tr{background:#F7FAFC}
+th{padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:#4A5568;letter-spacing:0.8px;text-transform:uppercase;border-bottom:1px solid #E2E8F0;white-space:nowrap}
+tbody tr{border-bottom:1px solid #F0F4F8;transition:background 0.1s}
+tbody tr:hover{background:#F7FAFC}
+td{padding:9px 14px;font-size:12px;vertical-align:middle}
+.growth-up{color:#22C55E;font-weight:600}
+.growth-down{color:#EF4444;font-weight:600}
+.rank{width:28px;height:28px;border-radius:50%;background:#EBF1FB;color:#0D2B5E;font-weight:700;font-size:11px;display:inline-flex;align-items:center;justify-content:center}
+footer{text-align:center;padding:12px;font-size:11px;color:#A0AEC0;background:#fff;border-top:1px solid #E2E8F0;margin:0 24px 24px;border-radius:0 0 6px 6px}
+@media(max-width:900px){.kpi-row{grid-template-columns:1fr 1fr}.charts-row{grid-template-columns:1fr}}
+@media(max-width:500px){.kpi-row{grid-template-columns:1fr}}
+@media print{.filter-bar,.topbar button{display:none}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>eCommerce MIS Performance Dashboard</h1>
+    <div class="topbar-meta">Client: Multi-Category eCommerce Platform &nbsp;|&nbsp; Prepared by: Aakash Verma &nbsp;|&nbsp; Reporting Period: Jan–Dec 2024</div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-navy" onclick="exportReport()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3)">⬇ Export Report</button>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <label>Period:</label>
+  <select id="periodFilter" onchange="updateDashboard()">
+    <option value="90">Last 90 Days</option>
+    <option value="60">Last 60 Days</option>
+    <option value="30">Last 30 Days</option>
+    <option value="365" selected>Full Year 2024</option>
+  </select>
+  <label>Category:</label>
+  <select id="catFilter" onchange="updateDashboard()">
+    <option value="all">All Categories</option>
+    <option value="electronics">Electronics</option>
+    <option value="fashion">Fashion & Apparel</option>
+    <option value="home">Home & Kitchen</option>
+  </select>
+  <span class="updated" id="lastUpdated">Last updated: Jun 2025</span>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-val" id="kpi-rev">₹4.82 Cr</div><div class="kpi-change up" id="kpi-rev-ch">▲ 18.4% vs LY</div></div>
+  <div class="kpi green"><div class="kpi-label">Total Orders</div><div class="kpi-val" id="kpi-ord">38,247</div><div class="kpi-change up" id="kpi-ord-ch">▲ 12.1% vs LY</div></div>
+  <div class="kpi amber"><div class="kpi-label">Avg Order Value</div><div class="kpi-val" id="kpi-aov">₹1,260</div><div class="kpi-change up" id="kpi-aov-ch">▲ 5.6% vs LY</div></div>
+  <div class="kpi red"><div class="kpi-label">Return Rate</div><div class="kpi-val" id="kpi-ret">6.2%</div><div class="kpi-change down" id="kpi-ret-ch">▲ 0.8pp vs LY</div></div>
+</div>
+
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-title">Monthly Revenue Trend — 2024</div>
+    <div class="chart-subtitle">All categories · Net revenue after returns</div>
+    <canvas id="trendChart" height="90"></canvas>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Revenue by Category</div>
+    <div class="chart-subtitle">Full year contribution %</div>
+    <canvas id="catChart" height="180"></canvas>
+  </div>
+</div>
+
+<div class="table-card">
+  <div class="table-header">
+    <span>Top 10 SKUs by Revenue — 2024</span>
+    <button class="btn btn-navy" onclick="exportSKU()">⬇ Export SKU Data</button>
+  </div>
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr>
+      <th>Rank</th><th>SKU ID</th><th>Product Name</th><th>Category</th>
+      <th>Units Sold</th><th>Revenue</th><th>Avg Price</th><th>Returns</th><th>Growth YoY</th>
+    </tr></thead>
+    <tbody id="skuTable"></tbody>
+  </table>
+  </div>
+  <footer>Prepared by <strong>Aakash Verma</strong> &nbsp;|&nbsp; aakashverma852787@gmail.com &nbsp;|&nbsp; linkedin.com/in/aakashverma-dataops</footer>
+</div>
+
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const REVENUE_DATA = {
+  all:     [28.4,31.2,29.8,34.6,38.1,42.3,39.7,44.8,41.2,47.6,52.3,58.9],
+  electronics: [12.1,13.4,11.9,15.2,16.8,19.1,17.4,21.3,18.9,22.4,26.1,30.2],
+  fashion: [9.2,10.8,10.6,11.4,13.1,14.7,13.9,15.1,14.2,16.4,17.8,19.4],
+  home:    [7.1,7.0,7.3,8.0,8.2,8.5,8.4,8.4,8.1,8.8,8.4,9.3]
+};
+
+const SKU_DATA = [
+  ["SKU-4821","Apple AirPods Pro (Gen 2)","Electronics",1842,"₹34,82,000","₹18,900",4.1,"+28.3%"],
+  ["SKU-2234","Samsung 65\" QLED TV","Electronics",612,"₹27,54,000","₹44,999",2.8,"+19.7%"],
+  ["SKU-7701","Nike Air Max 270 (Men's)","Fashion",3210,"₹19,26,000","₹6,000",8.2,"+34.1%"],
+  ["SKU-3312","Instant Pot Duo 7-in-1","Home",1456,"₹14,56,000","₹9,999",3.4,"+12.8%"],
+  ["SKU-5590","boAt Rockerz 550 BT","Electronics",4892,"₹14,18,000","₹2,899",5.9,"+41.2%"],
+  ["SKU-8823","Levi's 511 Slim Jeans","Fashion",2670,"₹12,01,500","₹4,500",11.3,"+8.4%"],
+  ["SKU-1145","Dyson V12 Detect Slim","Home",388,"₹11,64,000","₹29,999",1.9,"+22.6%"],
+  ["SKU-6634","OnePlus Nord CE 4","Electronics",890,"₹10,68,000","₹12,000",6.7,"+15.9%"],
+  ["SKU-4490","H&M Floral Midi Dress","Fashion",3890,"₹8,75,250","₹2,249",13.4,"-3.2%"],
+  ["SKU-2287","Prestige Iris 750W Mixer","Home",2100,"₹7,35,000","₹3,500",2.1,"+9.8%"],
+];
+
+let trendChart, catChart;
+
+function buildCharts(){
+  const tCtx = document.getElementById('trendChart').getContext('2d');
+  trendChart = new Chart(tCtx,{
+    type:'line',
+    data:{
+      labels:MONTHS,
+      datasets:[{
+        label:'Revenue (₹ Lakh)',
+        data:REVENUE_DATA.all,
+        borderColor:'#1A56A0',
+        backgroundColor:'rgba(26,86,160,0.07)',
+        borderWidth:2.5,
+        pointRadius:4,
+        pointBackgroundColor:'#1A56A0',
+        fill:true,
+        tension:0.35
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`₹${ctx.raw} L`}}},
+      scales:{
+        y:{grid:{color:'#F0F4F8'},ticks:{callback:v=>`₹${v}L`,font:{size:11}}},
+        x:{grid:{display:false},ticks:{font:{size:11}}}
+      }
+    }
+  });
+
+  const cCtx = document.getElementById('catChart').getContext('2d');
+  catChart = new Chart(cCtx,{
+    type:'doughnut',
+    data:{
+      labels:['Electronics','Fashion & Apparel','Home & Kitchen'],
+      datasets:[{
+        data:[46.2,33.1,20.7],
+        backgroundColor:['#0D2B5E','#1A56A0','#93B4DC'],
+        borderWidth:0
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},padding:12}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw}%`}}
+      }
+    }
+  });
+}
+
+function renderSKU(){
+  const tb = document.getElementById('skuTable');
+  tb.innerHTML = SKU_DATA.map((r,i)=>`
+    <tr>
+      <td><span class="rank">${i+1}</span></td>
+      <td><code style="font-size:11px;color:#718096">${r[0]}</code></td>
+      <td><strong>${r[1]}</strong></td>
+      <td>${r[2]}</td>
+      <td>${r[3].toLocaleString()}</td>
+      <td><strong>${r[4]}</strong></td>
+      <td>${r[5]}</td>
+      <td>${r[6]}%</td>
+      <td class="${r[7].startsWith('+')? 'growth-up':'growth-down'}">${r[7]}</td>
+    </tr>
+  `).join('');
+}
+
+function updateDashboard(){
+  const cat = document.getElementById('catFilter').value;
+  const data = REVENUE_DATA[cat] || REVENUE_DATA.all;
+  trendChart.data.datasets[0].data = data;
+  trendChart.update();
+  const KPI_MAP = {
+    all:    ['₹4.82 Cr','38,247','₹1,260','6.2%'],
+    electronics:['₹2.23 Cr','9,644','₹2,310','4.8%'],
+    fashion:['₹1.60 Cr','19,781','₹810','11.6%'],
+    home:   ['₹0.99 Cr','8,822','₹1,122','2.7%']
+  };
+  const k = KPI_MAP[cat]||KPI_MAP.all;
+  document.getElementById('kpi-rev').textContent=k[0];
+  document.getElementById('kpi-ord').textContent=k[1];
+  document.getElementById('kpi-aov').textContent=k[2];
+  document.getElementById('kpi-ret').textContent=k[3];
+}
+
+function exportReport(){
+  const rows=[['Month','Revenue (Lakh)'],...MONTHS.map((m,i)=>[m,REVENUE_DATA.all[i]])];
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  dl('MIS_Dashboard_AakashVerma.csv',csv);
+}
+function exportSKU(){
+  const h=['Rank','SKU','Product','Category','Units','Revenue','Avg Price','Return Rate','Growth YoY'];
+  const rows=SKU_DATA.map((r,i)=>[i+1,...r]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  dl('TopSKU_Report_AakashVerma.csv',csv);
+}
+function dl(name,csv){
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=name; a.click();
+}
+
+buildCharts();
+renderSKU();
+</script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Data Enrichment Report — Salesforce | Aakash Verma</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8;color:#1a202c;font-size:13px}
+.topbar{background:#0D2B5E;color:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.topbar h1{font-size:15px;font-weight:600}
+.topbar-meta{font-size:11px;opacity:0.65;margin-top:2px}
+.sf-badge{display:inline-flex;align-items:center;gap:5px;background:#00A1E0;color:#fff;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600}
+.btn{padding:6px 14px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:opacity 0.15s}
+.btn-ghost{background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.25)}.btn-ghost:hover{background:rgba(255,255,255,0.2)}
+.btn-export{background:#22C55E;color:#fff;padding:8px 18px;font-size:13px}.btn-export:hover{opacity:0.9}
+.summary-row{display:flex;gap:12px;padding:16px 24px;flex-wrap:wrap}
+.sum-card{background:#fff;border:1px solid #E2E8F0;border-radius:6px;padding:14px 20px;flex:1;min-width:130px;text-align:center}
+.sum-num{font-size:24px;font-weight:700;color:#0D2B5E;line-height:1}
+.sum-num.green{color:#15803D}
+.sum-num.blue{color:#1A56A0}
+.sum-num.gold{color:#B45309}
+.sum-lbl{font-size:11px;color:#718096;margin-top:4px;text-transform:uppercase;letter-spacing:0.8px}
+.dq-card{background:#fff;border:1px solid #E2E8F0;border-radius:6px;padding:14px 20px;flex:2;min-width:220px}
+.dq-label{font-size:11px;color:#718096;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px}
+.dq-bars{display:flex;flex-direction:column;gap:6px}
+.dq-bar-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.dq-bar-name{width:80px;color:#4A5568;text-align:right}
+.dq-track{flex:1;height:8px;background:#E2E8F0;border-radius:4px;overflow:hidden}
+.dq-fill{height:100%;border-radius:4px}
+.dq-val{width:36px;font-weight:600;color:#0D2B5E}
+.toolbar{background:#fff;border-bottom:1px solid #E2E8F0;padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar label{font-size:12px;color:#4A5568;font-weight:500}
+.toolbar select{border:1px solid #CBD5E0;border-radius:4px;padding:5px 10px;font-size:12px;color:#2D3748;font-family:inherit}
+.table-wrap{padding:0 24px 8px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E2E8F0;min-width:1100px}
+thead tr{background:#0D2B5E;color:#fff}
+th{padding:9px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap}
+tbody tr{border-bottom:1px solid #F0F4F8}
+tbody tr:hover{background:#F7FAFC}
+td{padding:8px 12px;font-size:12px;vertical-align:top}
+.before-col{background:#FFFBEB}
+.after-col{background:#F0FFF4}
+.col-head{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-bottom:1px solid #E2E8F0}
+.col-head.before{background:#FEF9C3;color:#A16207}
+.col-head.after{background:#DCFCE7;color:#15803D}
+.missing{color:#CBD5E0;font-style:italic;font-size:11px}
+.filled{color:#15803D;font-weight:500}
+.conf-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.conf-h{background:#DCFCE7;color:#15803D}
+.conf-m{background:#FEF9C3;color:#A16207}
+.conf-l{background:#FEE2E2;color:#B91C1C}
+.source-tag{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#EBF1FB;color:#1A56A0;font-weight:500}
+.delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#15803D;font-weight:600}
+footer{text-align:center;padding:14px;font-size:11px;color:#A0AEC0;border-top:1px solid #E2E8F0;background:#fff;margin:8px 24px 24px;border-radius:0 0 6px 6px}
+@media print{.toolbar,.topbar .btn-ghost{display:none}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>CRM Data Enrichment Report — B2B Outreach Pipeline</h1>
+    <div class="topbar-meta">Platform: Salesforce CRM &nbsp;·&nbsp; Analyst: Aakash Verma &nbsp;·&nbsp; Batch: ENRICH-2025-04 &nbsp;·&nbsp; Completed: Apr 2025</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span class="sf-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      Salesforce
+    </span>
+    <button class="btn btn-ghost" onclick="window.print()">🖨 Print</button>
+    <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+</div>
+
+<div class="summary-row">
+  <div class="sum-card"><div class="sum-num green">15</div><div class="sum-lbl">Records Enriched</div></div>
+  <div class="sum-card"><div class="sum-num blue" id="fields-added">0</div><div class="sum-lbl">Fields Added</div></div>
+  <div class="sum-card"><div class="sum-num gold">91.3%</div><div class="sum-lbl">Avg Confidence</div></div>
+  <div class="sum-card"><div class="sum-num green">78%</div><div class="sum-lbl">Coverage Gain</div></div>
+  <div class="dq-card">
+    <div class="dq-label">Data Quality Score — Before vs After</div>
+    <div class="dq-bars">
+      <div class="dq-bar-row"><span class="dq-bar-name">Email</span><div class="dq-track"><div class="dq-fill" style="width:93%;background:#22C55E"></div></div><span class="dq-val">93%</span></div>
+      <div class="dq-bar-row"><span class="dq-bar-name">Phone</span><div class="dq-track"><div class="dq-fill" style="width:87%;background:#22C55E"></div></div><span class="dq-val">87%</span></div>
+      <div class="dq-bar-row"><span class="dq-bar-name">LinkedIn</span><div class="dq-track"><div class="dq-fill" style="width:100%;background:#1A56A0"></div></div><span class="dq-val">100%</span></div>
+      <div class="dq-bar-row"><span class="dq-bar-name">Industry</span><div class="dq-track"><div class="dq-fill" style="width:100%;background:#1A56A0"></div></div><span class="dq-val">100%</span></div>
+      <div class="dq-bar-row"><span class="dq-bar-name">Emp Count</span><div class="dq-track"><div class="dq-fill" style="width:80%;background:#F59E0B"></div></div><span class="dq-val">80%</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <label>Filter by Source:</label>
+  <select id="srcFilter" onchange="applyFilter()">
+    <option value="">All Sources</option>
+    <option>LinkedIn + Hunter.io</option>
+    <option>LinkedIn + Snov.io</option>
+    <option>Company Website + LinkedIn</option>
+    <option>D&B + LinkedIn</option>
+  </select>
+  <label>Confidence:</label>
+  <select id="confFilter" onchange="applyFilter()">
+    <option value="0">Any</option>
+    <option value="90">High (≥90%)</option>
+    <option value="80">Medium (≥80%)</option>
+  </select>
+</div>
+
+<div class="table-wrap">
+<table id="mainTable">
+<thead>
+<tr>
+  <th rowspan="2" style="vertical-align:middle">#</th>
+  <th colspan="4" class="col-head before" style="background:#B45309;color:#fff;text-align:center">BEFORE ENRICHMENT</th>
+  <th colspan="5" class="col-head after" style="background:#15803D;color:#fff;text-align:center">AFTER ENRICHMENT</th>
+  <th rowspan="2" style="vertical-align:middle">Fields Added</th>
+  <th rowspan="2" style="vertical-align:middle">Source</th>
+  <th rowspan="2" style="vertical-align:middle">Confidence</th>
+</tr>
+<tr>
+  <th style="background:#FEF9C3;color:#A16207">Company</th>
+  <th style="background:#FEF9C3;color:#A16207">Contact</th>
+  <th style="background:#FEF9C3;color:#A16207">Email</th>
+  <th style="background:#FEF9C3;color:#A16207">Phone</th>
+  <th style="background:#DCFCE7;color:#15803D">Company</th>
+  <th style="background:#DCFCE7;color:#15803D">Contact + Title</th>
+  <th style="background:#DCFCE7;color:#15803D">Email</th>
+  <th style="background:#DCFCE7;color:#15803D">LinkedIn</th>
+  <th style="background:#DCFCE7;color:#15803D">Industry · Emp.</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+<footer>Prepared by <strong>Aakash Verma</strong> &nbsp;|&nbsp; aakashverma852787@gmail.com &nbsp;|&nbsp; linkedin.com/in/aakashverma-dataops &nbsp;|&nbsp; Confidential — Salesforce CRM Internal</footer>
+</div>
+
+<script>
+// [before: company, contact, email, phone] [after: company, contact+title, email, linkedin, industry·emp] [fields, source, conf]
+const DATA = [
+  [["Caterpillar Inc.","—","—","—"],["Caterpillar Inc.","James R. Owens · CFO","jowens@cat.com","+1-309-675-1000","linkedin.com/in/jrowens-cat","Industrial Mfg · 107,000"],["Email, Phone, LinkedIn, Title","LinkedIn + Hunter.io","97%"]],
+  [["Parker Hannifin","Tom B.","—","—"],["Parker Hannifin Corp.","Thomas Brown · VP Sales","t.brown@parker.com","+1-216-896-3400","linkedin.com/in/tombrown-parker","Industrial Mfg · 55,000"],["Email, Phone, LinkedIn, Full Name","LinkedIn + Snov.io","94%"]],
+  [["3M Company","—","—","—"],["3M Company","Linda Harrington · Dir. Procurement","l.harrington@mmm.com","+1-651-733-1110","linkedin.com/in/lindaharrington3m","Diversified Mfg · 96,000"],["Email, Phone, LinkedIn, Contact, Title","LinkedIn + Hunter.io","96%"]],
+  [["Honeywell Intl","Raj Mehta","r.mehta@honeywell.com","—"],["Honeywell International","Raj Mehta · Senior Buyer","r.mehta@honeywell.com","+1-704-627-6200","linkedin.com/in/rajmehta-honeywell","Aerospace & Controls · 98,000"],["Phone, LinkedIn, Title, Emp Count","Company Website + LinkedIn","91%"]],
+  [["Emerson Electric","—","—","—"],["Emerson Electric Co.","Sarah J. Kim · Global Sourcing Mgr","sj.kim@emerson.com","+1-314-553-2000","linkedin.com/in/sarahjkim-emerson","Electronics Mfg · 87,000"],["Email, Phone, LinkedIn, Full Contact","LinkedIn + Hunter.io","93%"]],
+  [["Illinois Tool Works","Mike C.","—","312-555-0182"],["Illinois Tool Works","Michael Chen · VP Operations","m.chen@itw.com","312-555-0182","linkedin.com/in/michaelchen-itw","Diversified Mfg · 44,000"],["Email, LinkedIn, Title","LinkedIn + Snov.io","89%"]],
+  [["Olin Corp","—","—","—"],["Olin Corporation","Amanda Foster · Procurement Lead","a.foster@olin.com","+1-203-750-3100","linkedin.com/in/amandafoster-olin","Chemicals Mfg · 8,500"],["Email, Phone, LinkedIn, Full Contact","D&B + LinkedIn","88%"]],
+  [["Roper Tech","David S.","—","—"],["Roper Technologies","David Shrestha · Director, BD","d.shrestha@ropertech.com","+1-941-556-2700","linkedin.com/in/davidshrestha-roper","Industrial Tech · 17,000"],["Email, Phone, LinkedIn, Title","LinkedIn + Hunter.io","95%"]],
+  [["Watts Water","—","l.patel@watts.com","—"],["Watts Water Technologies","Lena Patel · Category Manager","l.patel@watts.com","+1-978-689-6100","linkedin.com/in/lenapatel-watts","Fluid Control Mfg · 4,600"],["Phone, LinkedIn, Title, Emp Count","Company Website + LinkedIn","90%"]],
+  [["Chart Industries","—","—","770-555-0219"],["Chart Industries Inc.","Kevin O'Brien · SVP Supply Chain","k.obrien@chartindustries.com","770-555-0219","linkedin.com/in/kevinobrien-chart","Industrial Gas Equip · 11,000"],["Email, LinkedIn, Full Name, Title","LinkedIn + Snov.io","92%"]],
+  [["Insteel Ind.","Priya N.","—","—"],["Insteel Industries","Priya Nair · Purchasing Manager","p.nair@insteel.com","+1-704-872-7800","linkedin.com/in/priyanair-insteel","Steel Products Mfg · 1,900"],["Email, Phone, LinkedIn, Title","LinkedIn + Hunter.io","87%"]],
+  [["Albany Intl","—","—","—"],["Albany International","Robert Decker · Global Account Mgr","r.decker@albint.com","+1-518-445-2300","linkedin.com/in/rdecker-albany","Advanced Textiles · 4,300"],["Email, Phone, LinkedIn, Full Contact","D&B + LinkedIn","91%"]],
+  [["Haynes Intl","John M.","j.m@haynesintl.com","—"],["Haynes International","John Marcus · Dir. Sales, Americas","j.marcus@haynesintl.com","+1-765-456-6200","linkedin.com/in/johnmarcus-haynes","Specialty Alloys · 1,400"],["Phone, LinkedIn, Title, Full Name","Company Website + LinkedIn","93%"]],
+  [["NN Inc.","—","—","423-555-0147"],["NN Incorporated","Sunita Rao · Procurement Specialist","s.rao@nninc.com","423-555-0147","linkedin.com/in/sunitarao-nn","Precision Components · 2,100"],["Email, LinkedIn, Full Contact, Title","LinkedIn + Hunter.io","86%"]],
+  [["Mueller Water","Carlos V.","—","—"],["Mueller Water Products","Carlos Vargas · VP Strategic Sourcing","c.vargas@muellerwaterproducts.com","+1-404-526-4500","linkedin.com/in/carlosvargas-mueller","Water Infrastructure · 3,700"],["Email, Phone, LinkedIn, Title","LinkedIn + Snov.io","94%"]],
+];
+
+function countFields(row){
+  return row[2][0].split(', ').length;
+}
+
+function confClass(c){const v=parseInt(c);return v>=90?'conf-h':v>=80?'conf-m':'conf-l';}
+
+function renderTable(rows){
+  let totalFields=0;
+  const tb = document.getElementById('tableBody');
+  tb.innerHTML = rows.map((r,i)=>{
+    const [before, after, meta] = r;
+    const fa = countFields(r);
+    totalFields+=fa;
+    const missingStyle = (v)=>v==='—'?`<span class="missing">— missing</span>`:`<span>${v}</span>`;
+    return `<tr>
+      <td style="color:#A0AEC0;font-size:11px">${String(i+1).padStart(2,'0')}</td>
+      <td class="before-col">${before[0]}</td>
+      <td class="before-col">${missingStyle(before[1])}</td>
+      <td class="before-col">${missingStyle(before[2])}</td>
+      <td class="before-col">${missingStyle(before[3])}</td>
+      <td class="after-col" style="font-weight:600;color:#0D2B5E">${after[0]}</td>
+      <td class="after-col"><span class="filled">${after[1]}</span></td>
+      <td class="after-col"><span class="filled">${after[2]}</span></td>
+      <td class="after-col"><a href="https://${after[3]}" style="color:#1A56A0;font-size:11px" target="_blank">↗ ${after[3].split('/').pop()}</a></td>
+      <td class="after-col" style="font-size:11px;color:#4A5568">${after[4]}</td>
+      <td><span class="delta">+${fa}</span></td>
+      <td><span class="source-tag">${meta[1]}</span></td>
+      <td><span class="conf-badge ${confClass(meta[2])}">${meta[2]}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('fields-added').textContent = rows.reduce((s,r)=>s+countFields(r),0);
+}
+
+function applyFilter(){
+  const src = document.getElementById('srcFilter').value;
+  const conf = parseInt(document.getElementById('confFilter').value)||0;
+  const filtered = DATA.filter(r=>{
+    if(src && r[2][1]!==src) return false;
+    if(conf && parseInt(r[2][2])<conf) return false;
+    return true;
+  });
+  renderTable(filtered);
+}
+
+function exportCSV(){
+  const h=['#','Before: Company','Before: Contact','Before: Email','Before: Phone',
+           'After: Company','After: Contact+Title','After: Email','After: LinkedIn','After: Industry+Emp',
+           'Fields Added','Source','Confidence'];
+  const rows = DATA.map((r,i)=>{
+    return [i+1,r[0][0],r[0][1],r[0][2],r[0][3],
+            r[1][0],r[1][1],r[1][2],r[1][3],r[1][4],
+            countFields(r),r[2][1],r[2][2]].map(v=>`"${v}"`).join(',');
+  });
+  const csv = [h.join(','),...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'CRM_Enrichment_Report_AakashVerma.csv';
+  a.click();
+}
+
+renderTable(DATA);
+</script>
+</body>
+</html>

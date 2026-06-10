@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B2B Manufacturer Verification — U.S. Market | Aakash Verma</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;background:#F0F2F5;color:#1a1a2e}
+.topbar{background:#0D2B5E;color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.topbar-title{font-size:15px;font-weight:600;letter-spacing:0.3px}
+.topbar-meta{font-size:11px;opacity:0.7}
+.toolbar{background:#fff;border-bottom:1px solid #E2E8F0;padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.toolbar select,.toolbar input{border:1px solid #CBD5E0;border-radius:4px;padding:5px 10px;font-size:12px;color:#2D3748;font-family:inherit}
+.btn{padding:6px 14px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:opacity 0.15s}
+.btn-navy{background:#0D2B5E;color:#fff}.btn-navy:hover{opacity:0.88}
+.btn-outline{background:#fff;color:#0D2B5E;border:1px solid #0D2B5E}.btn-outline:hover{background:#EBF1FB}
+.stats-bar{display:flex;gap:12px;padding:16px 24px;flex-wrap:wrap}
+.stat-card{background:#fff;border:1px solid #E2E8F0;border-radius:6px;padding:14px 20px;min-width:140px;flex:1}
+.stat-card .num{font-size:24px;font-weight:700;color:#0D2B5E;line-height:1}
+.stat-card .lbl{font-size:11px;color:#718096;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+.stat-card.green .num{color:#276749}
+.stat-card.yellow .num{color:#B7791F}
+.stat-card.red .num{color:#C53030}
+.table-wrap{padding:0 24px 24px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E2E8F0;border-radius:6px;overflow:hidden;min-width:1100px}
+thead tr{background:#0D2B5E;color:#fff}
+th{padding:10px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap}
+tbody tr{border-bottom:1px solid #F0F2F5;transition:background 0.1s}
+tbody tr:hover{filter:brightness(0.97)}
+tbody tr.verified{background:#F0FFF4}
+tbody tr.pending{background:#FFFFF0}
+tbody tr.rejected{background:#FFF5F5}
+td{padding:9px 12px;font-size:12px;vertical-align:middle;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-v{background:#C6F6D5;color:#276749}
+.badge-p{background:#FEFCBF;color:#B7791F}
+.badge-r{background:#FED7D7;color:#C53030}
+.link-cell a{color:#1A56A0;text-decoration:none;font-size:11px}
+.link-cell a:hover{text-decoration:underline}
+footer{text-align:center;padding:16px;font-size:11px;color:#A0AEC0;border-top:1px solid #E2E8F0;background:#fff;margin:0 24px 24px;border-radius:0 0 6px 6px}
+@media(max-width:600px){.stats-bar{flex-direction:column}.stat-card{min-width:unset}}
+@media print{.toolbar,.topbar .btn{display:none}.table-wrap{padding:0}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">B2B Manufacturer Verification Database — U.S. Market</div>
+    <div class="topbar-meta">Client: Confidential B2B Intelligence Project &nbsp;|&nbsp; Analyst: Aakash Verma &nbsp;|&nbsp; Completed: May 2025</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+    <button class="btn btn-navy" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+</div>
+
+<div class="toolbar">
+  <label style="font-size:12px;color:#4A5568;font-weight:500">Filter:</label>
+  <select id="statusFilter" onchange="applyFilter()">
+    <option value="">All Statuses</option>
+    <option value="Verified">Verified</option>
+    <option value="Pending">Needs Review</option>
+    <option value="Rejected">Rejected</option>
+  </select>
+  <select id="stateFilter" onchange="applyFilter()">
+    <option value="">All States</option>
+    <option>Texas</option><option>California</option><option>Ohio</option>
+    <option>Michigan</option><option>Illinois</option><option>Pennsylvania</option>
+    <option>Georgia</option><option>North Carolina</option><option>Indiana</option>
+    <option>Wisconsin</option>
+  </select>
+  <input type="text" id="searchInput" placeholder="Search company..." oninput="applyFilter()" style="width:180px">
+  <span id="rowCount" style="font-size:12px;color:#718096;margin-left:auto"></span>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="num" id="s-total">20</div><div class="lbl">Total Records</div></div>
+  <div class="stat-card green"><div class="num" id="s-verified">14</div><div class="lbl">Verified ✓</div></div>
+  <div class="stat-card"><div class="num" id="s-pct">70%</div><div class="lbl">Verification Rate</div></div>
+  <div class="stat-card yellow"><div class="num" id="s-pending">4</div><div class="lbl">Needs Review</div></div>
+  <div class="stat-card red"><div class="num" id="s-rejected">2</div><div class="lbl">Rejected</div></div>
+</div>
+
+<div class="table-wrap">
+<table id="mainTable">
+<thead>
+<tr>
+  <th>#</th>
+  <th>Company Name</th>
+  <th>NAICS Code</th>
+  <th>Industry</th>
+  <th>State</th>
+  <th>Phone</th>
+  <th>Website</th>
+  <th>LinkedIn</th>
+  <th>Status</th>
+  <th>Data Source</th>
+  <th>Verified Date</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+<footer>Prepared by <strong>Aakash Verma</strong> &nbsp;|&nbsp; aakashverma852787@gmail.com &nbsp;|&nbsp; linkedin.com/in/aakashverma-dataops &nbsp;|&nbsp; Confidential — For Client Use Only</footer>
+</div>
+
+<script>
+const DATA = [
+  ["Caterpillar Inc.","333120","Construction Machinery Mfg","Illinois","(309) 675-1000","caterpillar.com","linkedin.com/company/caterpillar","Verified","D&B + LinkedIn + Official Website","2025-04-12","Active operations confirmed; 3 manufacturing plants verified"],
+  ["Parker Hannifin Corp.","332912","Fluid Power Valve Mfg","Ohio","(216) 896-3000","parker.com","linkedin.com/company/parker-hannifin","Verified","SEC Filing + Company Website","2025-04-14","Headquarters confirmed; 135 U.S. plants active"],
+  ["Illinois Tool Works","332111","Iron & Steel Forging","Illinois","(847) 724-7500","itw.com","linkedin.com/company/illinois-tool-works","Verified","EDGAR + D&B","2025-04-10","Fortune 200; multiple NAICS codes confirmed"],
+  ["Roper Technologies","334513","Industrial Instrument Mfg","Florida","(941) 556-2601","ropertech.com","linkedin.com/company/roper-technologies","Verified","Company Website + LinkedIn","2025-04-18","Active; acquired 3 mfg units 2023-24"],
+  ["Watts Water Technologies","332919","Other Metal Valve Mfg","Massachusetts","(978) 689-6066","watts.com","linkedin.com/company/watts-water","Verified","SEC 10-K + D&B","2025-04-15","Confirmed domestic manufacturing in 6 states"],
+  ["Albany International","313210","Broadwoven Fabric Mills","New York","(518) 445-2200","albint.com","linkedin.com/company/albany-international","Verified","EDGAR + Official Site","2025-04-20","Machine clothing division confirmed active"],
+  ["Haynes International","331210","Steel Product Mfg","Indiana","(765) 456-6000","haynesintl.com","linkedin.com/company/haynes-international","Verified","Annual Report 2024 + D&B","2025-04-11","Specialty alloy manufacturer; Kokomo IN plant active"],
+  ["NN Inc.","332991","Ball & Roller Bearing Mfg","Tennessee","(423) 743-9151","nninc.com","linkedin.com/company/nn-inc","Verified","Company Website + LinkedIn","2025-04-22","Precision components; 8 U.S. facilities confirmed"],
+  ["Chart Industries","333415","A/C & Warm Air Heating Equip","Georgia","(770) 721-2700","chartindustries.com","linkedin.com/company/chart-industries","Verified","SEC Filing + Site Visit Data","2025-04-17","Cryogenic equipment; Ball Ground GA HQ active"],
+  ["Insteel Industries","331221","Steel Wire Drawing","North Carolina","(704) 872-7789","insteel.com","linkedin.com/company/insteel-industries","Verified","Annual Report + D&B","2025-04-19","Wire products mfg; 7 plants confirmed across Southeast"],
+  ["Northwest Steel Fabricators","332312","Fabricated Structural Metal","Michigan","(313) 582-4400","nwsteelfab.com","linkedin.com/company/nwsteelfab","Verified","State Registry + LinkedIn","2025-04-23","Mid-size; Detroit area; active permits confirmed"],
+  ["Precision Castparts Corp.","331512","Steel Investment Foundries","Oregon","(503) 417-4800","precast.com","linkedin.com/company/precision-castparts","Verified","Berkshire 10-K + D&B","2025-04-13","Berkshire subsidiary; aerospace components active"],
+  ["Globe Specialty Metals","331410","Primary Nonferrous Metal","West Virginia","(304) 522-2461","globespecialtymetals.com","linkedin.com/company/globe-specialty","Verified","USGS Report + D&B","2025-04-16","Silicon metal producer; Alloy WV plant active"],
+  ["Mueller Water Products","332911","Industrial Valve Mfg","Georgia","(404) 526-4477","muellerwaterproducts.com","linkedin.com/company/mueller-water","Verified","SEC 10-K + Website","2025-04-21","Water infrastructure; Atlanta HQ active"],
+  ["Olin Corporation","325180","Other Basic Inorganic Chem","Connecticut","(203) 750-3000","olin.com","linkedin.com/company/olin-corporation","Pending","D&B Only — Website Down","2025-04-25","Website offline during verification; phone confirmed active"],
+  ["Greenbrier Companies","336510","Railroad Rolling Stock Mfg","Oregon","(503) 684-7000","gbrx.com","linkedin.com/company/greenbrier-companies","Pending","LinkedIn Only — No SEC Filing","2025-04-26","Railcar manufacturer; needs additional source confirmation"],
+  ["TransDigm Group","336413","Other Aircraft Parts Mfg","Ohio","(216) 706-2960","transdigm.com","linkedin.com/company/transdigm","Pending","Company claims mfg but no plant data","2025-04-27","Holding company structure; individual plant verification needed"],
+  ["Lydall Inc.","336350","Motor Vehicle Transmission","Connecticut","(860) 646-1233","lydall.com","linkedin.com/company/lydall","Pending","Acquired by Unifrax 2022 — status unclear","2025-04-28","Post-acquisition operational status unconfirmed; follow-up required"],
+  ["Superior Industries","336330","Motor Vehicle Steering Parts","Michigan","(248) 352-7300","supind.com","linkedin.com/company/superior-industries","Rejected","D&B shows ceased operations 2023","2025-04-29","Closed Southfield MI plant; no active U.S. manufacturing found"],
+  ["Nortek Inc.","332410","Power Boiler & Heat Exchanger","Rhode Island","(401) 751-1600","nortek.com","linkedin.com/company/nortek","Rejected","Merged into Melrose Industries; U.S. mfg discontinued","2025-04-30","Post-merger; U.S. manufacturing operations transferred to UK entity"],
+];
+
+const STATUS_MAP = {"Verified":"verified","Pending":"pending","Rejected":"rejected"};
+const BADGE_MAP = {"Verified":"badge-v","Pending":"badge-p","Rejected":"badge-r"};
+const LABEL_MAP = {"Verified":"✓ Verified","Pending":"⏳ Review","Rejected":"✗ Rejected"};
+
+function renderTable(rows){
+  const tb = document.getElementById('tableBody');
+  tb.innerHTML = '';
+  rows.forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    tr.className = STATUS_MAP[r[8]] || '';
+    tr.innerHTML = `
+      <td style="color:#A0AEC0;font-size:11px">${String(i+1).padStart(2,'0')}</td>
+      <td><strong>${r[0]}</strong></td>
+      <td><code style="background:#EBF1FB;padding:2px 6px;border-radius:3px;font-size:11px;color:#0D2B5E">${r[1]}</code></td>
+      <td>${r[2]}</td>
+      <td>${r[4]}</td>
+      <td style="color:#4A5568">${r[5]}</td>
+      <td class="link-cell"><a href="https://${r[6]}" target="_blank">↗ ${r[6]}</a></td>
+      <td class="link-cell"><a href="https://${r[7]}" target="_blank">↗ Profile</a></td>
+      <td><span class="badge ${BADGE_MAP[r[8]]}">${LABEL_MAP[r[8]]}</span></td>
+      <td style="color:#718096;font-size:11px">${r[9]}</td>
+      <td style="color:#718096">${r[10]}</td>
+      <td style="color:#4A5568;max-width:220px;white-space:normal;font-size:11px">${r[11]}</td>
+    `;
+    tb.appendChild(tr);
+  });
+  document.getElementById('rowCount').textContent = `Showing ${rows.length} of ${DATA.length} records`;
+}
+
+function applyFilter(){
+  const st = document.getElementById('statusFilter').value;
+  const state = document.getElementById('stateFilter').value;
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = DATA.filter(r=>{
+    if(st && r[8]!==st) return false;
+    if(state && r[4]!==state) return false;
+    if(q && !r[0].toLowerCase().includes(q)) return false;
+    return true;
+  });
+  renderTable(filtered);
+  updateStats(filtered);
+}
+
+function updateStats(rows){
+  const v=rows.filter(r=>r[8]==='Verified').length;
+  const p=rows.filter(r=>r[8]==='Pending').length;
+  const rej=rows.filter(r=>r[8]==='Rejected').length;
+  document.getElementById('s-total').textContent=rows.length;
+  document.getElementById('s-verified').textContent=v;
+  document.getElementById('s-pct').textContent=rows.length?Math.round(v/rows.length*100)+'%':'0%';
+  document.getElementById('s-pending').textContent=p;
+  document.getElementById('s-rejected').textContent=rej;
+}
+
+function exportCSV(){
+  const headers=['#','Company','NAICS','Industry','State','Phone','Website','LinkedIn','Status','Source','Date','Notes'];
+  const rows=DATA.map((r,i)=>[i+1,...r].map(v=>`"${v}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='B2B_Manufacturer_Verification_AakashVerma.csv';
+  a.click();
+}
+
+renderTable(DATA);
+updateStats(DATA);
+</script>
+</body>
+</html>
